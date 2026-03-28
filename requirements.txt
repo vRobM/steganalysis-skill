@@ -1,0 +1,15 @@
+# Steganalysis Skill Dependencies
+# Install: python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+
+# Core dependencies
+numpy==2.2.3
+pillow==11.1.0
+scipy==1.15.1
+
+# Optional: Enhanced analysis
+opencv-python==4.11.0.86
+scikit-image==0.25.1
+pandas==2.2.3
+
+# Steganalysis tools
+aletheia==0.3.3

@@ -16,7 +16,6 @@ tools:
 Comprehensive steganography and steganalysis toolkit. Use when the user wants to hide data in images/audio (encode), extract hidden data (decode), detect the presence of hidden content (steganalysis), or forensically analyze media for steganographic artifacts. Covers spatial-domain, frequency-domain, and modern encrypted steganography including HIDEAGEM, F5, JSteg, spread spectrum, and LSB matching techniques.
 
 <!-- AI-CONTEXT-START -->
-<!-- AI-CONTEXT-END -->
 
 ## Quick Reference
 
@@ -34,6 +33,8 @@ Comprehensive steganography and steganalysis toolkit. Use when the user wants to
 | LSB plane visualization | `python3 scripts/lsb_visualize.py --input image.png --channel all` |
 | Cross-image correlation | `python3 scripts/cross_correlate.py --images *.jpg` |
 | Batch scan directory | `python3 scripts/steg_scan.py --dir ./images/ --recursive` |
+
+<!-- AI-CONTEXT-END -->
 
 ## When To Use
 
