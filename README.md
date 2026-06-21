@@ -6,14 +6,50 @@ Covers spatial-domain, frequency-domain, and modern encrypted steganography incl
 
 ## Installation
 
+### 1. Clone the repo
+
 ```bash
-# Create a virtual environment
+git clone https://github.com/vRobM/steganalysis-skill.git
+cd steganalysis-skill
+```
+
+### 2. Install Python dependencies
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
+
+### 3. Register as an agent skill
+
+Install into whichever runtime(s) you use:
+
+#### OpenCode
+
+```bash
+ln -s "$(pwd)" ~/.config/opencode/skills/steganalysis
+```
+
+#### Claude Code
+
+```bash
+ln -s "$(pwd)" ~/.claude/skills/steganalysis
+```
+
+#### Codex
+
+```bash
+ln -s "$(pwd)" ~/.codex/skills/steganalysis
+```
+
+#### Hermes Agent
+
+```bash
+ln -s "$(pwd)" ~/.hermes/skills/steganalysis
+```
+
+After linking, restart your agent session. The skill activates automatically when you mention steganography, steganalysis, hiding data in images, or detecting hidden content.
 
 ### Dependencies
 
@@ -142,14 +178,6 @@ steganalysis-skill/
 - Weighted Stego analysis
 - F5 calibration attack
 - DCT LSB bias detection
-
-## Running as an aidevops Skill
-
-This skill is designed to run inside [aidevops](https://github.com/marcusquinn/aidevops). Copy or symlink into your aidevops skills directory:
-
-```bash
-ln -s /path/to/steganalysis-skill ~/.config/opencode/skills/steganalysis
-```
 
 ## License
 
