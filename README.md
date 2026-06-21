@@ -1,6 +1,6 @@
 # Steganalysis Skill
 
-Encode, decode, detect, and analyze steganographic content in images. A comprehensive toolkit for steganography and steganalysis, built as an [aidevops](https://github.com/marcusquinn/aidevops) skill.
+Encode, decode, detect, and analyze steganographic content in images. A comprehensive steganography and steganalysis toolkit that works as a skill for [OpenCode](https://github.com/opencode-ai/opencode), [Claude Code](https://github.com/anthropics/claude-code), [Codex](https://github.com/openai/codex), and [Hermes Agent](https://github.com/hermes-agent/hermes).
 
 Covers spatial-domain, frequency-domain, and modern encrypted steganography including HIDEAGEM, F5, JSteg, spread spectrum, and LSB matching techniques.
 
@@ -63,13 +63,10 @@ After installation, restart your agent session. The skill activates automaticall
 
 ```bash
 # LSB Replacement — simple, detectable
-python3 scripts/steg_encode.py --cover image.png --payload secret.txt --output stego.png
+python3 scripts/steg_encode.py encode --cover image.png --input secret.txt --output stego.png
 
 # LSB Matching — harder to detect
-python3 scripts/steg_encode.py --cover image.png --payload secret.txt --output stego.png --method lsb_matching
-
-# DCT embedding — frequency domain
-python3 scripts/steg_encode.py --cover image.jpg --payload secret.txt --output stego.jpg --method dct
+python3 scripts/steg_encode.py encode --cover image.png --input secret.txt --output stego.png --method lsb-matching
 ```
 
 ### Decode (Extract Data)
@@ -84,28 +81,21 @@ python3 scripts/steg_decode.py --input stego.png --output extracted/
 # Single image — runs all detection methods
 python3 scripts/steg_detect.py --input suspicious.png
 
-# Specific method
-python3 scripts/steg_detect.py --input image.png --method chi_square
-python3 scripts/steg_detect.py --input image.png --method rs
-python3 scripts/steg_detect.py --input image.png --method spa
-python3 scripts/steg_detect.py --input image.png --method weighted
-python3 scripts/steg_detect.py --input image.jpg --method calibration
-
-# DCT LSB Bias (primary test for JPEGs)
-python3 scripts/dct_lsb_bias.py image.jpg
+# Scan a directory
+python3 scripts/steg_detect.py --input ./images/ --recursive
 ```
 
 ### Batch Scan
 
 ```bash
-python3 scripts/steg_scan.py --directory ./images/ --recursive
+python3 scripts/steg_scan.py --dir ./images/ --recursive
 ```
 
 ### Analysis Tools
 
 ```bash
 # DCT coefficient analysis
-python3 scripts/dct_analyze.py image.jpg
+python3 scripts/dct_analyze.py --input image.jpg
 
 # LSB plane visualization
 python3 scripts/lsb_visualize.py --input image.png --channel all
