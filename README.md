@@ -23,33 +23,33 @@ pip install -r requirements.txt
 
 ### 3. Register as an agent skill
 
-Install into whichever runtime(s) you use:
+Each runtime has a different skills directory. Tell your agent to install it:
 
 #### OpenCode
 
-```bash
-ln -s "$(pwd)" ~/.config/opencode/skills/steganalysis
-```
+> Install the steganalysis skill from https://github.com/vRobM/steganalysis-skill
+
+The agent will clone the repo and symlink it into `~/.config/opencode/skills/steganalysis`.
 
 #### Claude Code
 
-```bash
-ln -s "$(pwd)" ~/.claude/skills/steganalysis
-```
+> Install the steganalysis skill from https://github.com/vRobM/steganalysis-skill
+
+The agent will clone the repo and symlink it into `~/.claude/skills/steganalysis`.
 
 #### Codex
 
-```bash
-ln -s "$(pwd)" ~/.codex/skills/steganalysis
-```
+> Install the steganalysis skill from https://github.com/vRobM/steganalysis-skill
+
+The agent will clone the repo and symlink it into `~/.codex/skills/steganalysis`.
 
 #### Hermes Agent
 
-```bash
-ln -s "$(pwd)" ~/.hermes/skills/steganalysis
-```
+> Install the steganalysis skill from https://github.com/vRobM/steganalysis-skill
 
-After linking, restart your agent session. The skill activates automatically when you mention steganography, steganalysis, hiding data in images, or detecting hidden content.
+The agent will clone the repo and symlink it into `~/.hermes/skills/steganalysis`.
+
+After installation, restart your agent session. The skill activates automatically when you mention steganography, steganalysis, hiding data in images, or detecting hidden content.
 
 ### Dependencies
 
