@@ -81,6 +81,15 @@ python3 scripts/steg_decode.py --input stego.png --output extracted/
 # Single image — runs all detection methods
 python3 scripts/steg_detect.py --input suspicious.png
 
+# Specific method group
+python3 scripts/steg_detect.py --input image.png --method lsb     # spatial domain checks
+python3 scripts/steg_detect.py --input image.jpg --method dct     # DCT/frequency only
+python3 scripts/steg_detect.py --input image.png --method chi     # chi-square only
+python3 scripts/steg_detect.py --input image.png --method fast    # appended + lsb + chi
+
+# Comma-separated mix
+python3 scripts/steg_detect.py --input image.png --method chi,entropy,autocorr
+
 # Scan a directory
 python3 scripts/steg_detect.py --input ./images/ --recursive
 ```

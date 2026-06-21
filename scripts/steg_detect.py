@@ -275,98 +275,142 @@ def idat_chunk_analysis(image_path):
     }
 
 
+# Method groups: which checks each --method value runs
+METHOD_GROUPS = {
+    "all": {"appended", "chunks", "lsb_ratio", "chi_square", "entropy", "autocorr", "dct"},
+    "lsb": {"appended", "chunks", "lsb_ratio", "chi_square", "entropy", "autocorr"},
+    "dct": {"dct"},
+    "chi": {"chi_square"},
+    "entropy": {"entropy"},
+    "autocorr": {"autocorr"},
+    "fast": {"appended", "lsb_ratio", "chi_square"},
+}
+
+
 def run_detection(image_path, methods="all"):
-    """Run full detection pipeline on an image."""
+    """Run detection pipeline on an image.
+
+    Args:
+        image_path: Path to image file.
+        methods: Comma-separated method names or a group key (all, lsb, dct, chi,
+                 entropy, autocorr, fast). Unknown names are treated as individual
+                 check keys.
+    """
+    # Resolve method set
+    requested = {m.strip() for m in methods.split(",")}
+    checks = set()
+    for m in requested:
+        if m in METHOD_GROUPS:
+            checks |= METHOD_GROUPS[m]
+        else:
+            checks.add(m)
+
     print(f"\n{'=' * 60}")
     print(f"STEGANALYSIS: {os.path.basename(image_path)}")
     print(f"{'=' * 60}")
 
     img = Image.open(image_path)
     print(f"  Format: {img.format}, Mode: {img.mode}, Size: {img.size}")
+    print(f"  Methods: {', '.join(sorted(checks))}")
 
     results = {}
+    step = 0
 
-    # 1. Appended data
-    print(f"\n  [1/7] Appended data check...")
-    results["appended"] = appended_data_check(image_path)
-    if results["appended"]["has_appended"]:
-        print(f"    ** APPENDED DATA: {results['appended']['appended_bytes']} bytes")
+    # 1. Appended data (format-agnostic)
+    if "appended" in checks:
+        step += 1
+        print(f"\n  [{step}] Appended data check...")
+        results["appended"] = appended_data_check(image_path)
+        if results["appended"]["has_appended"]:
+            print(f"    ** APPENDED DATA: {results['appended']['appended_bytes']} bytes")
 
-    # 2. IDAT chunk analysis (PNG)
-    print(f"  [2/7] Chunk analysis...")
-    results["chunks"] = idat_chunk_analysis(image_path)
-    if results["chunks"].get("suspicious"):
-        print(f"    ** UNIFORM IDAT CHUNKS")
+    # 2. IDAT chunk analysis (PNG only)
+    if "chunks" in checks:
+        step += 1
+        print(f"  [{step}] Chunk analysis...")
+        results["chunks"] = idat_chunk_analysis(image_path)
+        if results["chunks"].get("suspicious"):
+            print(f"    ** UNIFORM IDAT CHUNKS")
 
     # 3. LSB ratio
-    print(f"  [3/7] LSB ratio analysis...")
-    results["lsb_ratio"] = lsb_ratio_analysis(image_path)
-    for ch, r in results["lsb_ratio"].items():
-        flag = " **" if r["suspicious"] else ""
-        print(f"    {ch}: ratio={r['lsb_ratio']}{flag}")
+    if "lsb_ratio" in checks:
+        step += 1
+        print(f"  [{step}] LSB ratio analysis...")
+        results["lsb_ratio"] = lsb_ratio_analysis(image_path)
+        for ch, r in results["lsb_ratio"].items():
+            flag = " **" if r["suspicious"] else ""
+            print(f"    {ch}: ratio={r['lsb_ratio']}{flag}")
 
     # 4. Chi-square
-    print(f"  [4/7] Chi-square test...")
-    results["chi_square"] = chi_square_lsb(image_path)
-    for ch, r in results["chi_square"].items():
-        flag = " **" if r["suspicious"] else ""
-        print(f"    {ch}: chi={r['chi_square']}{flag}")
+    if "chi_square" in checks:
+        step += 1
+        print(f"  [{step}] Chi-square test...")
+        results["chi_square"] = chi_square_lsb(image_path)
+        for ch, r in results["chi_square"].items():
+            flag = " **" if r["suspicious"] else ""
+            print(f"    {ch}: chi={r['chi_square']}{flag}")
 
     # 5. Bit-plane entropy
-    print(f"  [5/7] Bit-plane entropy...")
-    results["entropy"] = bit_plane_entropy(image_path)
-    for ch, r in results["entropy"].items():
-        flag = " **" if r["suspicious"] else ""
-        print(f"    {ch}: LSB entropy={r['lsb_entropy']}{flag}")
+    if "entropy" in checks:
+        step += 1
+        print(f"  [{step}] Bit-plane entropy...")
+        results["entropy"] = bit_plane_entropy(image_path)
+        for ch, r in results["entropy"].items():
+            flag = " **" if r["suspicious"] else ""
+            print(f"    {ch}: LSB entropy={r['lsb_entropy']}{flag}")
 
     # 6. Spatial autocorrelation
-    print(f"  [6/7] Spatial autocorrelation...")
-    results["autocorr"] = spatial_autocorrelation(image_path)
-    for ch, r in results["autocorr"].items():
-        flag = " **" if r["suspicious"] else ""
-        print(
-            f"    {ch}: H={r['horizontal']} V={r['vertical']} D={r['diagonal']}{flag}"
-        )
+    if "autocorr" in checks:
+        step += 1
+        print(f"  [{step}] Spatial autocorrelation...")
+        results["autocorr"] = spatial_autocorrelation(image_path)
+        for ch, r in results["autocorr"].items():
+            flag = " **" if r["suspicious"] else ""
+            print(
+                f"    {ch}: H={r['horizontal']} V={r['vertical']} D={r['diagonal']}{flag}"
+            )
 
-    # 7. DCT analysis (JPEG)
-    print(f"  [7/7] DCT coefficient analysis...")
-    results["dct"] = dct_coefficient_analysis(image_path)
-    if "skipped" not in results["dct"]:
-        flag = (
-            " **"
-            if results["dct"]["f5_suspicious"] or results["dct"]["jsteg_suspicious"]
-            else ""
-        )
-        print(f"    +1/-1 ratio: {results['dct']['plus1_minus1_ratio']}{flag}")
-        print(f"    Zero rate: {results['dct']['zero_rate']}")
-        print(f"    {results['dct']['interpretation']}")
+    # 7. DCT analysis (JPEG only)
+    if "dct" in checks:
+        step += 1
+        print(f"  [{step}] DCT coefficient analysis...")
+        results["dct"] = dct_coefficient_analysis(image_path)
+        if "skipped" not in results["dct"]:
+            flag = (
+                " **"
+                if results["dct"]["f5_suspicious"] or results["dct"]["jsteg_suspicious"]
+                else ""
+            )
+            print(f"    +1/-1 ratio: {results['dct']['plus1_minus1_ratio']}{flag}")
+            print(f"    Zero rate: {results['dct']['zero_rate']}")
+            print(f"    {results['dct']['interpretation']}")
 
     # Overall assessment
     suspicious_count = 0
     findings = []
 
-    if results["appended"]["has_appended"]:
+    if results.get("appended", {}).get("has_appended"):
         suspicious_count += 1
         findings.append("Appended data after image marker")
-    if results["chunks"].get("suspicious"):
+    if results.get("chunks", {}).get("suspicious"):
         suspicious_count += 1
         findings.append("Uniform IDAT chunk sizes")
-    for ch, r in results["lsb_ratio"].items():
+    for ch, r in results.get("lsb_ratio", {}).items():
         if r["suspicious"]:
             suspicious_count += 1
             findings.append(f"Channel {ch} LSB ratio skewed ({r['lsb_ratio']})")
             break
-    for ch, r in results["entropy"].items():
+    for ch, r in results.get("entropy", {}).items():
         if r["suspicious"]:
             suspicious_count += 1
             findings.append(
                 f"Channel {ch} LSB entropy near maximum ({r['lsb_entropy']})"
             )
             break
-    if results["dct"].get("f5_suspicious"):
+    if results.get("dct", {}).get("f5_suspicious"):
         suspicious_count += 1
         findings.append("Possible F5 matrix encoding in DCT coefficients")
-    if results["dct"].get("jsteg_suspicious"):
+    if results.get("dct", {}).get("jsteg_suspicious"):
         suspicious_count += 1
         findings.append("Possible JSteg embedding in DCT coefficients")
 
@@ -397,7 +441,12 @@ def main():
         "--recursive", "-r", action="store_true", help="Scan directory recursively"
     )
     parser.add_argument(
-        "--method", "-m", default="all", help="Detection method (all, lsb, dct, chi)"
+        "--method",
+        "-m",
+        default="all",
+        help="Detection method or comma-separated list. "
+        "Groups: all, lsb, dct, chi, entropy, autocorr, fast. "
+        "Individual checks: appended, chunks, lsb_ratio, chi_square, entropy, autocorr, dct",
     )
     args = parser.parse_args()
 
